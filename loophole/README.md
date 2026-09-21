@@ -50,6 +50,7 @@ The app expects these options:
 - `port`: The local Home Assistant port, usually `8123`.
 - `hostname`: The tunnel hostname, for example `myhome`. The resulting tunnel URL will be `https://myhome.loophole.site`.
 - `verbose`: Enables verbose Loophole CLI output in the logs.
+- `connectivity_check_interval`: Minutes between public tunnel connectivity checks. Defaults to `15`.
 
 Example configuration:
 
@@ -57,6 +58,7 @@ Example configuration:
 port: 8123
 hostname: myhome
 verbose: false
+connectivity_check_interval: 15
 ```
 
 ## Authentication workflow

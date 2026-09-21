@@ -11,3 +11,6 @@ configuration:
   logout_on_restart:
     name: Exécuter la déconnexion au prochain redémarrage
     description: Lorsque activé, l'application se déconnectera du compte Loophole au prochain redémarrage, puis désactivera cette option. Cela force une nouvelle connexion au redémarrage suivant.
+  connectivity_check_interval:
+    name: Intervalle de vérification de la connectivité
+    description: Nombre de minutes entre les vérifications de la connexion du tunnel public. La valeur par défaut est de 15 minutes.

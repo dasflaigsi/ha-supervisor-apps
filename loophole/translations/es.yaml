@@ -11,3 +11,6 @@ configuration:
   logout_on_restart:
     name: Ejecutar cierre de sesión en el próximo reinicio
     description: Cuando está habilitado, la app cerrará la sesión de la cuenta de Loophole en el próximo reinicio y luego deshabilitará esta opción. Esto fuerza un nuevo inicio de sesión en el siguiente reinicio.
+  connectivity_check_interval:
+    name: Intervalo de comprobación de conectividad
+    description: Número de minutos entre las comprobaciones de la conexión del túnel público. El valor predeterminado es de 15 minutos.

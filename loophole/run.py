@@ -61,12 +61,12 @@ def log(message: str):
 def load_options():
     """Load options from Home Assistant"""
     if not OPTIONS_PATH.exists():
-        return {"port": 80, "hostname": "", "verbose": False, "logout_on_restart": False}
+        return {"port": 80, "hostname": "", "verbose": False, "logout_on_restart": False, "connectivity_check_interval": 15}
     try:
         return json.loads(OPTIONS_PATH.read_text(encoding="utf-8"))
     except Exception as e:
         log(f"Error loading options: {e}")
-        return {"port": 80, "hostname": "", "verbose": False, "logout_on_restart": False}
+        return {"port": 80, "hostname": "", "verbose": False, "logout_on_restart": False, "connectivity_check_interval": 15}
 
 
 def save_options(options):
@@ -374,6 +374,10 @@ def start_tunnel(options):
             
         except Exception as e:
             log(f"ERROR: Failed to start tunnel: {e}")
+            send_notification(
+                "Loophole Tunnel - Establishment Failed",
+                f"The tunnel could not be established: {e}",
+            )
             tunnel_process = None
             return False
 
@@ -409,16 +413,39 @@ def tunnel_watchdog():
         time.sleep(5)
 
         with lock:
-            if tunnel_process is not None:
-                if tunnel_process.poll() is not None:
-                    log(f"WARNING: Tunnel process exited with code {tunnel_process.returncode}")
-                    tunnel_process = None
+            tunnel_exited = tunnel_process is not None and tunnel_process.poll() is not None
+            if tunnel_exited:
+                exit_code = tunnel_process.returncode
+                log(f"WARNING: Tunnel process exited with code {exit_code}")
+                tunnel_process = None
 
-                    # Try to restart
-                    options = load_options()
-                    if is_valid(options):
-                        log("Attempting to restart tunnel...")
-                        start_tunnel(options)
+        if tunnel_exited:
+            send_notification(
+                "Loophole Tunnel - Connection Lost",
+                f"The tunnel process exited unexpectedly with code {exit_code}.",
+            )
+            options = load_options()
+            if is_valid(options):
+                log("Attempting to restart tunnel...")
+                start_tunnel(options)
+
+
+def check_tunnel_connectivity(options):
+    """Check that the public tunnel URL responds to an HTTP GET."""
+    hostname = str(options.get("hostname", "")).strip()
+    url = f"https://{hostname}.loophole.site"
+    request = urllib.request.Request(url, method="GET")
+
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            if 200 <= response.status < 400:
+                log(f"Connectivity check succeeded: {url} returned HTTP {response.status}")
+                return True
+            log(f"Connectivity check failed: {url} returned HTTP {response.status}")
+    except Exception as e:
+        log(f"Connectivity check failed for {url}: {e}")
+
+    return False
 
 
 def main():
@@ -433,7 +460,11 @@ def main():
         
         # Load options
         options = load_options()
-        log(f"Configuration: port={options.get('port')}, hostname={options.get('hostname')}, verbose={options.get('verbose', False)}")
+        log(
+            f"Configuration: port={options.get('port')}, hostname={options.get('hostname')}, "
+            f"verbose={options.get('verbose', False)}, "
+            f"connectivity_check_interval={options.get('connectivity_check_interval', 15)} minutes"
+        )
         
         # Check if logout on restart is requested
         if options.get('logout_on_restart', False):
@@ -469,10 +500,22 @@ def main():
             return
         
         log("App ready")
+
+        try:
+            check_interval = max(1, int(options.get("connectivity_check_interval", 15))) * 60
+        except (TypeError, ValueError):
+            check_interval = 15 * 60
+        next_connectivity_check = time.monotonic() + check_interval
         
         # Keep running
         while True:
             time.sleep(60)
+            if time.monotonic() >= next_connectivity_check:
+                if not check_tunnel_connectivity(options):
+                    log("Public tunnel is unreachable; restarting tunnel...")
+                    stop_tunnel()
+                    start_tunnel(options)
+                next_connectivity_check = time.monotonic() + check_interval
             
     except KeyboardInterrupt:
         log("Received interrupt signal")

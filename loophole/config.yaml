@@ -1,5 +1,5 @@
 name: Loophole Tunnel
-version: "1.1.0"
+version: "1.2.0"
 stage: stable
 slug: ha-loophole-addon
 apparmor: true
@@ -17,8 +17,10 @@ options:
   hostname: ""
   verbose: false
   logout_on_restart: false
+  connectivity_check_interval: 15
 schema:
   port: int(1,65535)
   hostname: str
   verbose: bool
   logout_on_restart: bool
+  connectivity_check_interval: int(1,1440)
