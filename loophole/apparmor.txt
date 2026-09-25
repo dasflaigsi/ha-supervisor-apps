@@ -16,6 +16,7 @@ profile ha-loophole-addon flags=(attach_disconnected,mediate_deleted) {
   /etc/services.d/** rwix,
   /etc/cont-init.d/** rwix,
   /etc/cont-finish.d/** rwix,
+  /run/ rwixk,
   /run/** rwixk,
   /dev/tty rw,
 
