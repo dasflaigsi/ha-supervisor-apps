@@ -316,7 +316,7 @@ def run_login_check():
 
         log(f"Process exited with code {rc}")
 
-        if rc == 0:
+        if rc == 0 or full_output.lower().find("already logged in") >= 0:
             log("✓ Successfully authenticated!")
             return True
 
