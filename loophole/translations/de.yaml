@@ -5,12 +5,12 @@ configuration:
   hostname:
     name: Hostname
     description: Benutzerdefinierter Hostname für Ihren Tunnel. Die Tunnel-URL wird sein https://<hostname>.loophole.site 
+  connectivity_check_interval:
+    name: Intervall der Verbindungskontrolle
+    description: Anzahl der Minuten zwischen den Prüfungen der öffentlichen Tunnelverbindung. Standardmäßig 15 Minuten.
   verbose:
     name: Ausführliches Logging
     description: Aktivieren Sie Debug-Logging von Loophole CLI, um detaillierte Tunnel-Operationen zu sehen
   logout_on_restart:
     name: Abmeldung beim nächsten Neustart ausführen
     description: Wenn aktiviert, meldet sich die App beim nächsten Neustart vom Loophole-Konto ab und deaktiviert diese Option dann. Dies erzwingt eine neue Anmeldung beim nächsten Neustart.
-  connectivity_check_interval:
-    name: Intervall der Verbindungskontrolle
-    description: Anzahl der Minuten zwischen den Prüfungen der öffentlichen Tunnelverbindung. Standardmäßig 15 Minuten.

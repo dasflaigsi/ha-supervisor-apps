@@ -1,5 +1,5 @@
 name: Loophole Tunnel
-version: "1.2.0"
+version: "1.2.1"
 stage: stable
 slug: ha-loophole-addon
 apparmor: true
@@ -15,12 +15,12 @@ homeassistant_api: true
 options:
   port: 8123
   hostname: ""
+  connectivity_check_interval: 15
   verbose: false
   logout_on_restart: false
-  connectivity_check_interval: 15
 schema:
   port: int(1,65535)
   hostname: str
+  connectivity_check_interval: int(1,1440)
   verbose: bool
   logout_on_restart: bool
-  connectivity_check_interval: int(1,1440)

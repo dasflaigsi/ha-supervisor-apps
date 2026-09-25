@@ -437,7 +437,7 @@ def check_tunnel_connectivity(options):
     request = urllib.request.Request(url, method="GET")
 
     try:
-        with urllib.request.urlopen(request, timeout=10) as response:
+        with urllib.request.urlopen(request, timeout=30) as response:
             if 200 <= response.status < 400:
                 log(f"Connectivity check succeeded: {url} returned HTTP {response.status}")
                 return True
