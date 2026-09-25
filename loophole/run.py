@@ -433,11 +433,18 @@ def tunnel_watchdog():
     """Monitor tunnel and restart if it crashes"""
     global tunnel_process
 
+    restart_delay = 5
+    max_restart_delay = 300
+
     while True:
         time.sleep(5)
 
         with lock:
-            tunnel_exited = tunnel_process is not None and tunnel_process.poll() is not None
+            tunnel_exited = (
+                tunnel_process is not None
+                and tunnel_process.poll() is not None
+            )
+
             if tunnel_exited:
                 exit_code = tunnel_process.returncode
                 log(f"WARNING: Tunnel process exited with code {exit_code}")
@@ -446,12 +453,19 @@ def tunnel_watchdog():
         if tunnel_exited:
             send_notification(
                 "Loophole Tunnel - Connection Lost",
-                f"The tunnel process exited unexpectedly with code {exit_code}.",
+                f"The tunnel process exited unexpectedly with code {exit_code}. "
+                f"Retrying in {restart_delay} seconds."
             )
+
+            time.sleep(restart_delay)
+
             options = load_options()
             if is_valid(options):
-                log("Attempting to restart tunnel...")
-                start_tunnel(options)
+                log(f"Attempting to restart tunnel after {restart_delay}s...")
+                if start_tunnel(options):
+                    restart_delay = 5
+                else:
+                    restart_delay = min(restart_delay * 2, max_restart_delay)
 
 
 def check_tunnel_connectivity(options):
