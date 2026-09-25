@@ -367,15 +367,23 @@ def start_tunnel(options):
             
             log(f"Starting tunnel: {' '.join(command)}")
             
-            logfile = open(LOG_PATH, "a", encoding="utf-8", errors="replace")
             tunnel_process = subprocess.Popen(
                 command,
-                stdout=logfile,
+                stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                bufsize=1,
                 env=get_loophole_env(),
             )
             log(f"Tunnel started with PID {tunnel_process.pid}")
+
+            def forward_output():
+                for line in tunnel_process.stdout:
+                    message = line.rstrip()
+                    if message:
+                        log(f"[tunnel] {message}")
+
+            threading.Thread(target=forward_output, daemon=True).start()
 
             # A successful Popen only means the process was created; Loophole
             # can still reject the upstream immediately after startup.
