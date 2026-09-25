@@ -65,11 +65,14 @@ profile ha-loophole-addon flags=(attach_disconnected,mediate_deleted) {
     # Required by the musl ELF interpreter
     /lib/ld-musl-x86_64.so.1 rix,
 
+    # Runtime/kernel networking information
+    /proc/sys/net/core/somaxconn r,
+
     # Network
     network inet stream,
     network inet6 stream,
 
     # Parent may stop/restart it
-    signal (receive),
+    signal (receive,send),
   }
 }

@@ -376,6 +376,16 @@ def start_tunnel(options):
                 env=get_loophole_env(),
             )
             log(f"Tunnel started with PID {tunnel_process.pid}")
+
+            # A successful Popen only means the process was created; Loophole
+            # can still reject the upstream immediately after startup.
+            time.sleep(5)
+            exit_code = tunnel_process.poll()
+            if exit_code is not None:
+                tunnel_process = None
+                log(f"ERROR: Tunnel exited during startup with code {exit_code}")
+                return False
+
             return True
             
         except Exception as e:
@@ -497,7 +507,9 @@ def main():
         if is_valid(options):
             if authenticated:
                 log("Configuration valid and authenticated, starting tunnel...")
-                start_tunnel(options)
+                if not start_tunnel(options):
+                    log("Tunnel failed to start; check the tunnel log for details")
+                    return
             else:
                 log("Configuration valid but not authenticated - tunnel not started")
                 return
