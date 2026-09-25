@@ -43,14 +43,16 @@ profile ha-loophole-addon flags=(attach_disconnected,mediate_deleted) {
   # Loophole
   /usr/local/bin/loophole cx -> loophole,
 
-
   profile loophole flags=(attach_disconnected,mediate_deleted) {
 
-    # Loophole executable
+    # Allow the CLI to execute itself while remaining in this profile.
     /usr/local/bin/loophole rix,
 
     # Loophole's persistent state
     /data/loophole-home/** rw,
+
+    # Loophole log
+    /data/loophole.log rwa,
 
     # Runtime / TLS
     /etc/** r,
@@ -59,6 +61,9 @@ profile ha-loophole-addon flags=(attach_disconnected,mediate_deleted) {
     /lib/** mr,
     /lib64/** mr,
     /usr/lib/** mr,
+
+    # Required by the musl ELF interpreter
+    /lib/ld-musl-x86_64.so.1 rix,
 
     # Network
     network inet stream,

@@ -217,6 +217,12 @@ def run_login_check():
                 timeout=5,
                 env=get_loophole_env(),
             )
+            if result.returncode != 0:
+                log(
+                    f"❌ Loophole CLI check failed with code {result.returncode}: "
+                    f"{result.stderr.strip()}"
+                )
+                return False
             log(f"✓ Loophole CLI available: {result.stdout.strip()}")
         except FileNotFoundError:
             log("❌ Loophole CLI not found in PATH")
@@ -310,7 +316,7 @@ def run_login_check():
 
         log(f"Process exited with code {rc}")
 
-        if rc in (0, 1):
+        if rc == 0:
             log("✓ Successfully authenticated!")
             return True
 
